@@ -1,0 +1,10 @@
+files=[
+server.properties
+sharedUrls.txt
+upload.txt
+user_jvm_args.txt
+]
+
+folders=[
+world
+]
