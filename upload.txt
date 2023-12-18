@@ -1,8 +1,14 @@
 files=[
-server.properties
-sharedUrls.txt
+run.bat
 upload.txt
+server.properties
+ops.json
 user_jvm_args.txt
+banned-players.json
+banned-ips.json
+usercache.json
+usernamecache.json
+whitelist.json
 ]
 
 folders=[

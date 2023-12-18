@@ -112,9 +112,9 @@ if defined latestFolder (
     echo Latest folder: %latestFolder%
 
     :: Copy latestFolder content
-    xcopy "%latestFolder%\*" "%actualFolder%" /E /Y
+    call :CopyFilesAndFolders "%latestFolder%" "%actualFolder%" "true"
 
-    echo Content copied from latest folder to main directory
+    echo Latest folder replaced in main directory
 ) else (
     echo No folders found
 )
@@ -161,6 +161,27 @@ if not exist "%uploadFile%" (
 )
 
 :: Copy files and folders to actualDate folder
+call :CopyFilesAndFolders "%actualFolder%" "%targetFolder%" "false"
+
+:: Create a new file with actualDate folder
+"%ProgramFiles%\7-Zip\7z.exe" a -t7z -r -w"%actualFolder%" "%actualFolder%\%localFileName%" "%actualDate%"
+
+:: Delete actualDate folder
+rmdir /s /q "%targetFolder%"
+
+:: Move the file to Local folder
+move "%actualFolder%\%localFileName%" "%localRoute%"
+
+pause
+
+REM ------------- FUNCTIONS -------------
+
+:: Copy files and folders from "upload.txt" to destination
+:copyFilesAndFolders
+set "source=%~1"
+set "destination=%~2"
+set "deleteDestination=%~3"
+
 for /F "tokens=*" %%A in ('findstr /N "^" "%uploadFile%"') do (
     set "line=%%A"
     set "line=!line:*:=!"
@@ -175,21 +196,18 @@ for /F "tokens=*" %%A in ('findstr /N "^" "%uploadFile%"') do (
         set "copyFiles=false"
         set "copyFolders=false"
     ) else if "!copyFiles!"=="true" (
-        echo Copying: "%actualFolder%\!line!" to "%targetFolder%\!line!"
-        echo F|xcopy "%actualFolder%\!line!" "%targetFolder%\!line!"
+        echo Copying: "%source%\!line!" to "%destination%\!line!"
+        echo F|xcopy "%source%\!line!" "%destination%\!line!" /Y
     ) else if "!copyFolders!"=="true" (
-        echo Copying: "%actualFolder%\!line!" to "%targetFolder%\!line!\"
-        echo D|xcopy "%actualFolder%\!line!" "%targetFolder%\!line!\" /E
+        if "%deleteDestination%"=="true" (
+            echo Removing and replacing "%source%\!line!"
+            rmdir /s /q "%destination%\!line!"
+            mkdir "%destination%\!line!" 2>nul
+            echo D|xcopy "%source%\!line!" "%destination%\!line!" /E
+        ) else (
+            echo Copying: "%source%\!line!" to "%destination%\!line!\"
+            echo D|xcopy "%source%\!line!" "%destination%\!line!\" /E
+        )
     )
 )
-
-:: Create a new file with actualDate folder
-"%ProgramFiles%\7-Zip\7z.exe" a -t7z -r -w"%actualFolder%" "%actualFolder%\%localFileName%" "%actualDate%"
-
-:: Delete actualDate folder
-rmdir /s /q "%targetFolder%"
-
-:: Move the file to Local folder
-move "%actualFolder%\%localFileName%" "%localRoute%"
-
-pause
+EXIT /B 0
