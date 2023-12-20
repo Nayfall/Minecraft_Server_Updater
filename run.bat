@@ -6,8 +6,8 @@ REM ------------- SETUP -------------
 :: Local route (Use %USERNAME% as your user folder)
 set "localRoute=C:\Users\%USERNAME%\Dropbox"
 
-:: Local file name (Is the name the local save will have, need extension .7z)
-set "localFileName=minecraftServer.7z"
+:: Local file name (Is the name the local save will have, need extension .zip)
+set "localFileName=minecraftServer.zip"
 
 :: ---------------------------------
 
@@ -26,10 +26,24 @@ set "urlsFile=%actualFolder%\sharedUrls.txt"
 :: Upload file
 set "uploadFile=%actualFolder%\upload.txt"
 
+REM ------------- START -------------
+
+:askReplace
+set /P "replaceLocalFiles=Want to replace local files with updated ones? (Y/N): "
+if /I "!replaceLocalFiles!" equ "Y" (
+    echo Realizing replacing logic...
+    goto replaceLogic
+) else if /I "!replaceLocalFiles!" equ "N" (
+    echo Skipping replacing logic
+    goto executeServer
+) else (
+    echo Only avaible options are Y and N
+    goto askReplace
+)
+
+:replaceLogic
 :: Create a temporal folder
 mkdir "%tempFolder%" 2>nul
-
-REM ------------- START -------------
 
 if exist "%localFile%" (
     :: Copy localFile to tempFolder if exists
@@ -50,7 +64,7 @@ if exist "%urlsFile%" (
         set "url=%%A"
 
         :: Assemble file name
-        set "fileName=file!counter!.7z"
+        set "fileName=file!counter!.zip"
   
         :: Check if URL is valid
         curl --head --fail --silent --show-error "!url!" >nul
@@ -73,10 +87,10 @@ set "latestFolder="
 set "latestDate=0"
 
 :: Check if downloaded files have a size greater than 1 MB and extract
-for %%F in ("%tempFolder%\*.7z") do (
+for %%F in ("%tempFolder%\*.zip") do (
   if %%~zF geq 1048576 (
     :: Extract file to tempFolder
-    "%ProgramFiles%\7-Zip\7z.exe" x "%%F" -o"%%~dpF"
+    powershell Expand-Archive -Path "%%F" -DestinationPath "%tempFolder%"
     set "extractStatus=!errorlevel!"
     if !extractStatus! neq 0 (
       echo Error extracting file: "%%F"
@@ -122,8 +136,9 @@ if defined latestFolder (
 :: Delete tempFolder
 rmdir /s /q "%tempFolder%"
 
+:executeServer
 :: Server execution (Place your server execution command)
-java @user_jvm_args.txt @libraries/net/minecraftforge/forge/1.20.1-47.2.17/win_args.txt %*
+java @user_jvm_args.txt @libraries/net/minecraftforge/forge/1.20.1-47.2.18/win_args.txt %*
 :: ---------------------------------
 
 REM ------------- UPLOAD -------------
@@ -164,7 +179,7 @@ if not exist "%uploadFile%" (
 call :CopyFilesAndFolders "%actualFolder%" "%targetFolder%" "false"
 
 :: Create a new file with actualDate folder
-"%ProgramFiles%\7-Zip\7z.exe" a -t7z -r -w"%actualFolder%" "%actualFolder%\%localFileName%" "%actualDate%"
+powershell Compress-Archive -Path "%actualFolder%\%actualDate%" -DestinationPath "%actualFolder%\%localFileName%"
 
 :: Delete actualDate folder
 rmdir /s /q "%targetFolder%"
