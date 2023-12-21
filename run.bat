@@ -32,7 +32,6 @@ REM ------------- START -------------
 set /P "replaceLocalFiles=Want to replace local files with updated ones? (Y/N): "
 if /I "!replaceLocalFiles!" equ "Y" (
     echo Realizing replacing logic...
-    goto replaceLogic
 ) else if /I "!replaceLocalFiles!" equ "N" (
     echo Skipping replacing logic
     goto executeServer
@@ -41,7 +40,6 @@ if /I "!replaceLocalFiles!" equ "Y" (
     goto askReplace
 )
 
-:replaceLogic
 :: Create a temporal folder
 mkdir "%tempFolder%" 2>nul
 
@@ -120,6 +118,7 @@ if "%hasNumericFolders%"=="true" (
 ) else (
     echo No folders with numeric names
 )
+
 
 :: Realize logic on latestFolder
 if defined latestFolder (
