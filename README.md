@@ -17,10 +17,11 @@ This script helps you by automating the download and extraction of necessary fil
 
 ## How to Use
 
-1. Modify "run.bat" with your cloud folder location, scroll down until you see server execution (Is above "UPLOAD" header) and place your server execution command.
-2. Add the files you want to keep in cloud to "upload.txt".
-3. Include your friends shared files URLs in "sharedUrls.txt" if you are sharing host.
-4. Run the script to automatically update your Minecraft server files.
+1. Modify "run.bat" with your cloud folder location.
+2. Scroll down until you see server execution (Is above "UPLOAD" header) and place your server execution command.
+3. Add the files you want to keep in cloud to "upload.txt".
+4. Include your friends shared files URLs in "sharedUrls.txt" if you are sharing host.
+5. Run the script to automatically update your Minecraft server files.
 
 ## Notes
 
